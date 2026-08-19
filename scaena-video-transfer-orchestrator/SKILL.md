@@ -108,7 +108,7 @@ scaena source-video register --from "$SOURCE_VIDEO" --project "$SCAENA_PROJECT" 
 
 Pi/插件只能调用 Scaena typed API、MCP owner 或 Eikona CLI；不得在插件中拼 provider 请求、读取 `.scaena` SQLite、覆盖 manifest/evidence，或把聊天 transcript 当作事实来源。
 
-所有 Eikona 图片 intent 在韩国转绘项目中默认显式使用 `openai/gpt-5.4-image-2`。短别名只作为兼容输入，历史 `openai:gpt-image-2` 只允许兼容读取；新的 prompt、skill、runbook 和正向命令必须保存 slash-form canonical ref。若 Eikona 回执出现双 provider 前缀、空 `original_model_ref` 或模型漂移，停止 Scaena handoff 并返回模型规范化 blocker。Pi 不保存 key，凭据只存在 Eikona user-level channel。
+所有 Eikona 图片 intent 在韩国转绘项目中默认显式使用 `openai/gpt-5.4-image-2`。短别名只作为显式兼容输入；新的 prompt、skill、runbook 和正向命令必须保存 slash-form canonical ref。若 Eikona 回执出现 provider-colon、双 provider 前缀、空 `original_model_ref` 或模型漂移，停止 Scaena handoff 并返回模型规范化 blocker。Pi 不保存 key，凭据只存在 Eikona user-level channel。
 
 ## Seedance 提示词与请求调试
 

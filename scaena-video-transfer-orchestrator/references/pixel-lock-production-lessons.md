@@ -56,15 +56,15 @@ scaena video transfer mask-track --help
 scaena video transfer manifest create --help
 export SCAENA_PROJECT=/path/to/scaena-project
 scaena asset verify --project "$SCAENA_PROJECT" --json
-eikona inspect <run-id> --json
+eikona inspect <run-id> --brief --agent
 ```
 
 Eikona 候选进入项目必须经过 typed handoff：
 
 ```bash
-eikona assets handoff img_02ad1bd225be --json
-eikona assets stage img_02ad1bd225be --to outputs/characters/korea-v3/candidates/yoon-ha-eun.png --json
-eikona assets apply img_02ad1bd225be --project current --to outputs/characters/korea-v3/candidates/yoon-ha-eun.png --yes --json
+eikona assets handoff img_02ad1bd225be --agent
+eikona assets stage img_02ad1bd225be --to outputs/characters/korea-v3/candidates/yoon-ha-eun.png --agent
+eikona assets apply img_02ad1bd225be --project current --to outputs/characters/korea-v3/candidates/yoon-ha-eun.png --yes --agent
 ```
 
 若 `scaena video transfer manifest create` 返回 `SUBJECT_VERSION_NOT_FROZEN`，保持 provider call count 为零，并回到 Scaena subject readiness；不要把 Eikona handle 或普通 asset ref 直接填成 frozen character version。

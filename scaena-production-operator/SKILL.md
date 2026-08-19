@@ -29,12 +29,17 @@ blocking_findings
 subject_readiness
 generation_preflight_ref
 shot_intent_ref
+shot_audio_intent_ref
+shot_audio_intent_digest
+provider_audio_policy
 shot_generation_spec_ref
 video_input_bundle_ref
 video_run_ref
 aigora_job_ref
 import_receipt_ref
 review_state
+audio_review_state
+final_mix_ref
 next_command
 resume_ref
 evidence_refs
@@ -115,7 +120,9 @@ Auctra accepted scene spans
   -> Scaena pending-review asset + import receipt
 ```
 
-`ShotIntent` owns narrative intent, timing, composition, action phases, camera, continuity, audio intent, and exact source refs. `ShotGenerationSpec` compiles that frozen intent against one capability/output contract. The spec must reference the intent digest; the bundle references both intent and spec digests. Never add the bundle digest back into the spec, which would create a digest cycle.
+`ShotIntent` owns narrative intent, timing, composition, action phases, camera, continuity, audio intent, and exact source refs. Audio intent must bind the versioned `ShotAudioIntent` plan/digest described by `$ai-drama-router`'s `references/shot-audio-intent-contract.md`; a free-text sound label is not sufficient. `ShotGenerationSpec` compiles that frozen intent against one capability/output contract. The spec must reference the intent digest; the bundle references both intent and spec digests. Never add the bundle digest back into the spec, which would create a digest cycle.
+
+Before video generation, require an explicit audio policy: `none | external_assets | video_native | replace_after_generation`. If the selected model can or may emit native audio and rights/sync/editability/review are not all known, default to `replace_after_generation`. Missing `ShotAudioIntent`, missing Sonora replacement route, or capability/audio-policy mismatch is a generation blocker.
 
 Before owner execution require all of the following to match: project, ProductionGraph ref/version, shot ref, frozen intent ref/digest, frozen spec ref/digest, validated bundle ref/digest, capability ref, duration, exact subject/style/reference versions, and a non-empty idempotency key.
 
@@ -163,6 +170,8 @@ scaena workflow repair run --repair <repair-ref> --json
 
 Never overwrite a canonical state with a hand-authored report. When report and projection disagree, treat CLI/application state and evidence refs as authoritative and record the drift as a finding.
 
+Review picture and sound independently. A visual pass must not propagate to the native audio track. Register provider-native audio through Sonora as `video_native_audio`; keep it pending review or replacement-required until rights, sync confidence, dialogue/voice, editability and duration checks pass. When the plan says `replace_after_generation`, bind the returned Sonora voice/SFX/music/mix refs before assembly.
+
 ### 9. Preview Progressively
 
 Run preview gates in order and stop on blockers:
@@ -173,7 +182,7 @@ scaena video motion-preview --graph <production-graph-ref> --mode preview-batch 
 scaena video motion-preview --graph <production-graph-ref> --mode full-preview --confirm --budget-ok --quota-ok --json
 ```
 
-Probe actual media duration with `ffprobe`. A fixture cut whose duration matches the target is not sufficient when its review is pending, motion clips are placeholders, timeline coverage is incomplete, or production export is blocked.
+Probe actual video and audio stream duration with `ffprobe`. Trimming a provider clip can leave a longer/shorter audio tail; re-check start, end, silence windows, dialogue/subtitle alignment and final mix duration after every cut. A fixture cut whose duration matches the target is not sufficient when its review is pending, motion clips are placeholders, timeline coverage is incomplete, or production export is blocked.
 
 ### 10. Export Only After Completion Gates
 
