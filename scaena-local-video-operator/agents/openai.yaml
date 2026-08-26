@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scaena 随手视频操作"
+  short_description: "用户工作区的随手视频 plan/费用确认/恢复与项目 candidate 升级；结果永远不是 production-ready。"
+  default_prompt: "Use $scaena-local-video-operator to plan or resume a quick user-workspace video with explicit cost confirmation, then return the next safe Scaena command."

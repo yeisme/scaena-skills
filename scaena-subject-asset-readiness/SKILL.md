@@ -1,11 +1,16 @@
 ---
 name: scaena-subject-asset-readiness
-description: Use when planning, reviewing, or operating Scaena character, location, prop, wardrobe, style, storyboard, shot, episode, cover, or motion asset work, especially before any production visual generation or when subject identity, reference assets, freeze state, shot bindings, generation preflight, or consistency is missing or uncertain.
+description: Use when planning, drawing, reviewing, selecting, freezing, or operating Scaena character, location, prop, wardrobe, style, storyboard, shot, episode, cover, or motion assets, especially for DrawSession candidate-card workflows, dependency waves, subject identity, reference assets, human-only selection/freeze, shot bindings, generation preflight, or consistency before production visual generation.
 ---
 
 # Scaena 主体资产就绪门禁
 
 先确定可复用主体资产，再允许剧集生产。不要把成功命令、图片数量、Eikona feedback、Auctra acceptance、legacy `approved` 或相似度总分当成 Scaena production readiness。
+
+## 必读参考
+
+- 使用真实 `scaena asset draw plan|start|record|select|freeze|status|path` 命令做候选抽卡、依赖波次和冻结时，读取 [candidate-draw-workflow.md](references/candidate-draw-workflow.md)。
+- 应用主体、rights、binding 和 generation preflight 门禁时，读取 [readiness-gates.md](references/readiness-gates.md)。
 
 ## 输入
 
@@ -24,6 +29,10 @@ subject_readiness=<passed|blocked|unknown>
 missing_subject_refs=<refs>
 missing_slots=<subject/slot>
 frozen_version_refs=<refs>
+draw_session_ref=<ref|none>
+draw_state=<state|none>
+candidate_count=<n>
+candidate_cap=<n>
 generation_preflight_ref=<ref|none>
 blocking_codes=<codes>
 allowed_next_mode=<subject_candidate|look_development|production|none>
@@ -47,6 +56,7 @@ evidence_refs=<refs>
 
 ```bash
 scaena help
+scaena asset draw --help
 scaena asset center --project <project-path> --agent
 scaena character bible show --project <project-path> --character <character-ref> --json
 scaena production graph show <production-graph-ref> --json
@@ -54,16 +64,31 @@ scaena shot board --project <project-path> --episode <episode-ref> --agent
 scaena visual pack plan --graph <production-graph-ref> --json
 ```
 
-如果 installed version 已提供 subject readiness、freeze、binding 或 preflight command，使用其 help 中的真实语法。若不存在，返回 `capability_missing` 和 owning OpenSpec `scaena-subject-asset-readiness`；不要编造命令或手写 `.scaena`/SQLite 状态。
+当前 first-support 已提供 `asset draw` 命令组。先按 [candidate-draw-workflow.md](references/candidate-draw-workflow.md) 使用其真实 help；若某个 readiness/freeze/binding/preflight 子命令在 installed version 不存在，返回 `capability_missing` 和 owning OpenSpec；不要编造命令或手写 `.scaena`/SQLite 状态。
 
-### 3. 区分 bootstrap 与 production
+### 3. 运行候选抽卡与依赖波次
+
+先计划 Wave 1 identity/style，再生成和登记最多 5 个候选，最后由 human actor 选择并冻结：
+
+```bash
+scaena asset draw plan --project <project-path> --asset <asset-ref> --brief <brief-ref> --wave 1 --json
+scaena asset draw start --project <project-path> --asset <asset-ref> --session <draw-session-ref> --json
+scaena asset draw record --project <project-path> --asset <asset-ref> --session <draw-session-ref> --eikona-run <eikona-run-ref> --digest sha256:<64-hex> --json
+scaena asset draw select --project <project-path> --asset <asset-ref> --candidate <candidate-ref> --action accept --actor <human-actor-ref> --reason "<reason>" --json
+scaena asset draw freeze --project <project-path> --asset <asset-ref> --confirm --json
+scaena asset draw status --project <project-path> --asset <asset-ref> --agent
+```
+
+`record` 只是 refs-only 登记，不调用 provider。每个 slot 同时只有一个 active session；默认第 6 个候选触发 exhausted，必须修 brief 后重开。Wave 2+ 通过 `--requires` 依赖已冻结 slot。human-only select/freeze 不得由 Agent 伪造；冻结后仍要通过 production readiness/preflight。
+
+### 4. 区分 bootstrap 与 production
 
 - `subject_candidate`、`subject_reference`、`look_development`：可在 accepted source/rights 就绪后自举；产物只能进入 candidate review。
 - `shot_visual`、`episode_visual`、`cover_visual`、`motion_visual`、production storyboard keyframe：必须有 current passed generation preflight。
 
 当主体未冻结时，最多路由到 `$eikona-subject-asset-director` 生成可比较候选；不得把候选绑定到 episode/shot。
 
-### 4. 应用主体门禁
+### 5. 应用主体门禁
 
 读取 [readiness-gates.md](references/readiness-gates.md)。至少检查：
 
@@ -80,7 +105,7 @@ scaena visual pack plan --graph <production-graph-ref> --json
 
 任一 production-required fact 缺失时，返回第一组可操作 blockers，并把 `allowed_next_mode` 限制为 candidate/lookdev/repair。不要因为 `visual pack plan` 或旧 render 命令返回 success 就放行。
 
-### 5. 把 fail-open 当成缺陷
+### 6. 把 fail-open 当成缺陷
 
 以下任一情况都不是“可继续”：
 
@@ -94,7 +119,7 @@ scaena visual pack plan --graph <production-graph-ref> --json
 
 发现上述行为时，停止 production generation，记录 bypass path、affected refs 和 owner-call risk。若任务是实现/修复，路由到 Scaena owning OpenSpec；若任务是操作，返回主体候选或 repair 的下一步。
 
-### 6. 生产请求必须固定版本
+### 7. 生产请求必须固定版本
 
 只有 current passed preflight 才允许继续。确认 request 固定：
 
@@ -113,11 +138,11 @@ expected_graph_version
 
 plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能自动换成“最新角色”。
 
-### 7. 生成后回到一致性审阅
+### 8. 生成后回到一致性审阅
 
 镜头产物默认进入 human consistency review。逐主体检查 identity、face/hair、silhouette、wardrobe、location layout、prop geometry、style、shot fit 与 rights。机器 assessment 只能分流；correction 创建 derived candidate，不覆盖 source asset。
 
-### 8. 结束时给出可恢复 handoff
+### 9. 结束时给出可恢复 handoff
 
 只返回 refs、blockers、allowed mode、下一条真实命令与 evidence。不要粘贴完整 canon、raw prompt、provider payload、embedding、private path、credential 或完整模型推理。
 
@@ -128,6 +153,8 @@ plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能
 - 不让 background exception 覆盖 named/close-up/recurring/continuity-relevant subject。
 - 不因用户要求“先出几张看看”而把 lookdev 伪装成 production asset。
 - 不自动接受、冻结、改绑、批量重绘或写入 visual memory。
+- 不手建 `assets/<asset-id>/draws/<seq>/candidate.png`；只使用 `asset draw path` 返回的标准路径。
+- 不把 `selected`/`frozen` 当作 production-admitted、shot-accepted 或 export-ready。
 - 不因 Aigora 返回成功回执而跳过 Scaena human consistency review；Phase 0 外部 artifact ref 只能进入 `pending_review`。
 
 ## 验证

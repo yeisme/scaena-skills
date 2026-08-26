@@ -1,11 +1,17 @@
 ---
 name: scaena-production-operator
-description: Use when planning, running, resuming, repairing, reviewing, or verifying a Scaena short-drama or comic-drama production from screenplay through subject asset readiness, accepted shot assets, motion preview, timeline, and export package, especially for frozen character/style/location/prop assets, generation preflight, consistency, target-duration coverage, blocking findings, or multi-session handoff.
+description: Use when planning, running, resuming, repairing, reviewing, assembling, refining, exporting, or verifying a Scaena short-drama or comic-drama production from accepted Auctra screenplay through storyboard breakdown, subject-card DrawSessions, frozen assets, accepted shots, episode preview, timeline variants, defect-routed refinement, delivery review, and export package.
 ---
 
 # Scaena Production Operator
 
 Operate Scaena as a staged production system. Do not equate generated files, fixture duration, or successful commands with a production-ready episode.
+
+## 必读参考
+
+- 生产阶段、owner 和 gate： [production-gates.md](references/production-gates.md)。
+- 整集拼接、timeline 选版、缺陷分类、有界精修和 export： [episode-refinement-loop.md](references/episode-refinement-loop.md)。
+- 主体抽卡、依赖波次、human-only select/freeze：`$scaena-subject-asset-readiness` 的 `references/candidate-draw-workflow.md`。
 
 ## Inputs
 
@@ -26,7 +32,10 @@ covered_duration
 accepted_refs
 failed_refs
 blocking_findings
+originality_decision_ref
 subject_readiness
+draw_session_refs
+frozen_subject_version_refs
 generation_preflight_ref
 shot_intent_ref
 shot_audio_intent_ref
@@ -40,6 +49,14 @@ import_receipt_ref
 review_state
 audio_review_state
 final_mix_ref
+episode_preview_ref
+edit_plan_ref
+selected_timeline_ref
+selected_cut_ref
+refinement_findings
+repair_receipts
+delivery_review_ref
+export_receipt_ref
 next_command
 resume_ref
 evidence_refs
@@ -76,6 +93,22 @@ Accept only a valid `auctra.production_handoff.v1` producer package or an explic
 
 Reject corpus items, semantic overlays, Pattern Lens evidence, dramatic recipes, holdout refs, raw video observations, or Studio client state as screenplay input. Those sources must first pass Auctra project linking, candidate generation, human review, and accepted screenplay export. Do not reconstruct missing canon inside Scaena.
 
+#### 2A. Break Down And Confirm Storyboard Direction
+
+Use `$scaena-storyboard-breakdown` and the installed command help:
+
+```bash
+scaena storyboard source import --help
+scaena storyboard breakdown run --help
+scaena storyboard breakdown show --help
+scaena storyboard breakdown revise --help
+scaena storyboard breakdown patch --help
+scaena storyboard breakdown accept --help
+scaena storyboard breakdown export --help
+```
+
+Before any paid image, video, or voice generation, explicitly present the story spine, per-shot beats, dialogue backbone, visual tone, and shot/episode duration contract to the current user. Require their confirmation. Use `revise` for structure, semantics, or source mapping; use typed `patch` only for supported local fields. Only an accepted breakdown may enter subject-card drawing or shot production.
+
 ### 3. Lock Brief And Timing
 
 Confirm target duration, platform, aspect ratio, episode interpretation, canonical screenplay ref, scene/beat scope, and approval policy before image generation.
@@ -93,6 +126,21 @@ Require accepted source facts, a frozen project style, frozen primary/secondary 
 If the installed Scaena version lacks readiness/freeze/preflight commands, report the capability gap and stop production generation. Do not use a successful `visual pack plan/render`, fixture accepted state, empty `reference_asset_refs`, or `--confirm` as a substitute.
 
 Only `subject_candidate`, `subject_reference`, and `look_development` may proceed before freeze, and their outputs must remain non-production. Route candidate creation or correction to `$eikona-subject-asset-director`.
+
+#### 4A. Run The Real Subject-Card Draw Loop
+
+For every required character, style, recurring location, wardrobe, or story-critical prop slot, use Scaena's DrawSession commands:
+
+```bash
+scaena asset draw plan --project <project-path> --asset <asset-ref> --brief <brief-ref> --wave 1 --json
+scaena asset draw start --project <project-path> --asset <asset-ref> --session <draw-session-ref> --json
+scaena asset draw record --project <project-path> --asset <asset-ref> --session <draw-session-ref> --eikona-run <eikona-run-ref> --digest sha256:<64-hex> --json
+scaena asset draw select --project <project-path> --asset <asset-ref> --candidate <candidate-ref> --action accept --actor <human-actor-ref> --reason "<reason>" --json
+scaena asset draw freeze --project <project-path> --asset <asset-ref> --confirm --json
+scaena asset draw status --project <project-path> --asset <asset-ref> --agent
+```
+
+Wave 1 locks identity/style; later waves use `--requires` for already frozen dependencies. One slot has one active session and a default cap of five candidates. `record` registers an existing Eikona run and does not call a provider. Candidate selection and freeze are human-only. Never hand-create candidate paths; use `scaena asset draw path`. Frozen subjects still require current generation preflight and exact shot bindings.
 
 ### 5. Build Asset Budget
 
@@ -184,18 +232,45 @@ scaena video motion-preview --graph <production-graph-ref> --mode full-preview -
 
 Probe actual video and audio stream duration with `ffprobe`. Trimming a provider clip can leave a longer/shorter audio tail; re-check start, end, silence windows, dialogue/subtitle alignment and final mix duration after every cut. A fixture cut whose duration matches the target is not sufficient when its review is pending, motion clips are placeholders, timeline coverage is incomplete, or production export is blocked.
 
-### 10. Export Only After Completion Gates
+### 10. Assemble The Episode And Route Refinement
+
+Read [episode-refinement-loop.md](references/episode-refinement-loop.md). Assemble only production-accepted segments:
+
+```bash
+scaena video episode-preview --project <project-path> --episode <episode-ref> --segment-asset <asset-1> --segment-duration-ms <ms-1> --output previews/<episode>.mp4 --confirm --json
+scaena edit plan --project <project-path> --graph <workflow-graph-ref> --platform douyin --target-duration 75 --json
+scaena edit timeline --project <project-path> --plan <edit-plan-ref> --variant fast-hook --json
+scaena edit render --project <project-path> --timeline <timeline-ref> --profile preview --output previews/<episode>-cut.mp4 --confirm --json
+scaena edit score --project <project-path> --cut <cut-ref> --json
+scaena edit select --project <project-path> --cut <cut-ref> --json
+```
+
+Score only recommends. Human/owner acceptance still selects the cut and final mix. Classify every defect before repair:
+
+- story, character, dialogue, causality, or hook → Auctra successor screenplay revision;
+- storyboard structure/semantics/source mapping → breakdown revise; allowed local fields → typed patch;
+- identity/style/wardrobe/location/prop → new DrawSession or derived Eikona candidate, then human select/freeze and preflight;
+- shot action/camera/artifact → regenerate only the affected shot;
+- dialogue/voice/Foley/music/sync/mix → Sonora/audio successor and independent review;
+- pacing/subtitle/transition/mix balance → new Scaena timeline/cut;
+- codec/checksum/manifest/package → Scaena delivery repair.
+
+Run at most one bounded owner-specific repair for the same deterministic finding. Preserve original and successor refs. Current `enhance run` v1 is fixture-only; do not claim a real paid enhancement provider without a real command, receipt, and artifact lineage.
+
+### 11. Export Only After Completion Gates
 
 Plan before confirming:
 
 ```bash
-scaena export package --dry-run --profile <profile> --to <output-path> --json
-scaena export package --confirm --profile <profile> --to <output-path> --json
+scaena export package --project <project-path> --profile <profile> --to <output-path> --json
+scaena export package --project <project-path> --profile <profile> --to <output-path> --confirm --json
 ```
 
 Require zero blocking findings, accepted required assets, timeline and audio/subtitle alignment, playable preview, rights, manifest, checksums, and evidence refs. Fail closed when `production_allowed=false` or the command requests repair.
 
-### 11. End The Session With Handoff
+The installed command does not support `--dry-run`. Omitting `--confirm` is the draft plan/preflight form, but `--to` still writes a CLI-managed draft manifest; it is not a zero-write preview. Confirmed export creates a local package; neither action authorizes publish.
+
+### 12. End The Session With Handoff
 
 Do not carry the full conversation into the next stage. Return only the compact receipt plus the exact next command, expected effect, side-effect class, and stop condition. A new session must resume from refs rather than reread the full repository or provider output.
 
@@ -207,6 +282,9 @@ Do not carry the full conversation into the next stage. Return only the compact 
 - Treat Aigora `unknown_accept` as “observe/reconcile the original execution”, never as permission to submit again.
 - Treat an Aigora success receipt as a safe external artifact reference in Phase 0. It becomes a Scaena `pending_review` projection, not an accepted production asset and not proof that bytes were copied into CAS.
 - Do not generate Scaena production visuals without a current passed generation preflight.
+- Do not bypass the current-user storyboard-direction confirmation before paid image, video, or voice generation.
+- Do not treat renaming, face/color swaps, synonym rewrites, frozen subjects, high quality scores, or successful export as proof of originality or rights clearance.
+- Do not overwrite an accepted source, selected candidate, timeline, cut, mix, or export during refinement; create successor refs and preserve lineage.
 - Do not claim completion from file counts, fixture success, or command exit zero alone.
 - Do not publish, spend externally, delete, or batch mutate without explicit authority.
 - Do not edit `.scaena` structured files, SQLite rows, manifests, receipts, or evidence metadata by hand.
@@ -219,3 +297,14 @@ Do not carry the full conversation into the next stage. Return only the compact 
 - For the single-shot Aigora canary, keep `owner.aigora_video_canary_enabled=false` by default. Validate an explicit local/service config with `scaena-production-worker config validate --config <path>`; never place credentials in tracked config or evidence.
 - Run `task test:integration` for the six-piece evidence bundle before promoting beyond first-support.
 - Prefer focused project commands; do not run root-wide scans or read both generated skill mirrors.
+
+## Quick 产物进入生产（quick capture gate）
+
+用户工作区的 quick 视频要进入项目时，走显式 capture，而不是移动文件：
+
+1. capture 前 checksum/readability/rights inspection 必须通过；失败零写（`QUICK_CANDIDATE_*` 稳定码）。
+2. capture 只写 `pending_review` candidate；candidate accepted ≠ shot accepted，两级独立人工决策。
+3. native audio 单独 review（`audio=off` 豁免）；blocking findings 或 unresolved rights 一律阻断 export（fail closed）。
+4. quick/candidate 来源 refs 只有在 explicit review→freeze→shot binding 之后才能进入 production input bundle；含 quick/candidate 成员的 bundle 只能按 candidate mode 提交，不放宽 gate。
+
+随手视频（无项目、个人预览）不路由本 Skill，走 `scaena-local-video-operator`；本 Skill 只处理做剧生产。

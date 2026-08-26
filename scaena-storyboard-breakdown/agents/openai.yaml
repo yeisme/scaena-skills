@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scaena 分镜拆解"
+  short_description: "把剧本拆成可审阅、可修订、可导出的 Scaena 分镜候选"
+  default_prompt: "Use $scaena-storyboard-breakdown to turn an episode script into a reviewable Scaena storyboard, revise or patch it, and export only after explicit approval."

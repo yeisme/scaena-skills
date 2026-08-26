@@ -1,12 +1,31 @@
 # Scaena Skills
 
-Scaena 制作编排、主体资产就绪和视频转绘流程的开源 Skills 集合。
+Scaena 分镜拆解、主体抽卡、逐镜生产、整集拼接、精修、交付和视频转绘流程的开源 Skills 集合。
 
 ## Skills
 
-- `scaena-production-operator`：可恢复的 plan/subject/produce/review/assemble/verify 生产阶段。
-- `scaena-subject-asset-readiness`：角色、场景、道具、服装、风格和镜头绑定的生产前门禁。
+- `scaena-production-operator`：从 accepted screenplay 到 storyboard、subject draw、produce、review、assemble、refine、delivery 和 export 的可恢复生产阶段。
+- `scaena-storyboard-breakdown`：Auctra 剧本 handoff 的 source import、分镜拆解、revise/patch、方向确认和 accepted breakdown。
+- `scaena-subject-asset-readiness`：角色、场景、道具、服装、风格的 DrawSession 抽卡、human-only 选卡/冻结和镜头绑定/preflight 门禁。
 - `scaena-video-transfer-orchestrator`：已有拆解视频的市场适配、参考资产、prompt provenance、canary 和生成交接。
+- `scaena-local-video-operator`：无项目个人 quick 视频；进入项目必须显式 capture 到 pending review。
+
+## 原创漫剧成片链路
+
+```text
+Auctra accepted screenplay handoff
+→ storyboard breakdown + current-user direction confirmation
+→ asset dependency waves
+→ Eikona candidates
+→ Scaena draw record / human select / freeze
+→ exact shot generation lineage
+→ visual + audio + continuity + production acceptance
+→ episode preview + edit timeline variants + cut selection
+→ owner-routed bounded refinement
+→ delivery review + checksummed export package
+```
+
+抽卡合同见 `scaena-subject-asset-readiness/references/candidate-draw-workflow.md`；拼接与精修合同见 `scaena-production-operator/references/episode-refinement-loop.md`。当前 `enhance run` v1 是 fixture-only；未注册的整集 workflow goal 和真实付费 enhancement 不得描述为已实现。
 
 ## 验证
 

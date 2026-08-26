@@ -1,4 +1,4 @@
 interface:
   display_name: "Scaena 漫剧生产 Operator"
-  short_description: "把剧本和逐镜音画意图转成可恢复、可审阅、可交付的生产流程。"
-  default_prompt: "Use $scaena-production-operator to plan or resume a Scaena short-drama production with ShotAudioIntent, provider-native audio policy, Sonora final-mix refs, asset budgets, stage gates, repair steps, and compact evidence handoff."
+  short_description: "从分镜、抽卡和逐镜生产到整集拼接、精修与成片导出。"
+  default_prompt: "Use $scaena-production-operator to import an accepted Auctra screenplay, confirm storyboard direction before paid generation, run subject-card DrawSessions, freeze exact assets, produce and independently review shot audio/video, assemble timeline variants, route defects to their owning domain, perform one bounded repair, and export only after delivery, originality, rights, manifest, and checksum gates."
