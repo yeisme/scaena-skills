@@ -36,8 +36,8 @@ run
 
 ## Revise 与 patch
 
-- Agent revise 会调用 Dramaturge，必须重新确认模型、cost cap、expected version 和 idempotency key。
-- Typed patch 是本地 immutable successor，不调用 owner；只允许 Skill 主文件列出的九类字段。
+- Agent revise 会调用 Scaena 进程内 `StoryboardModelRuntime`，必须重新确认模型、cost cap、expected version 和 idempotency key。
+- Typed patch 是本地 immutable successor，不调用模型；只允许 Skill 主文件列出的九类字段。
 - 一个请求中多个 patch field 必须 all-or-nothing。任一 field/path 无效时，不得把剩余字段拆成隐式部分成功。
 
 ## Accept

@@ -162,3 +162,21 @@ plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能
 - 每个 production entrypoint 都必须有 bypass-negative evidence；blocked 时 owner call count 为零。
 - exact test name 必须先用 `go test -list` 确认存在；宽泛或零命中 `-run` 不算证据。
 - first-support 必须覆盖 restart、two-project isolation、stale preflight、correction lineage 和标准 integration evidence 六件套。
+
+## 批次与稳定性认证（current）
+
+分镜资产批次与稳定性认证命令族（2026-08-26 已实现）：
+
+- 批次计划（零 provider 调用）：`scaena storyboard asset-batch plan --project .
+  --breakdown <ref> --candidate <ref> --kind foundation_assets|shot_keyframes --json`；
+  `review_candidate` 下 foundation 只标 provisional；`shot_keyframes` 要求 subject
+  frozen + prompt ready + binding current，否则 blocked。
+- 付费派发：`scaena storyboard asset-batch dispatch --plan <plan-ref> --max-cost-usd N
+  --eikona-endpoint <url> --confirm --json`；partial 只重试失败子集：
+  `retry --dispatch <ref> --failed-only --confirm`。owner 端点缺失即 fail closed。
+- 采纳：`scaena storyboard asset-batch adopt --artifact-batch <ref> --plan <ref>
+  --artifacts <ref,ref> --confirm --json`；只按 typed artifact ref/digest 的显式
+  成功集合采纳，进入 pending review，不推断 frozen/tested/admitted。
+- 稳定性认证：`scaena asset stability plan|run|status|verdict|certify`；verdict/
+  certify 只接受 human actor；certificate pass 不自动 admission——admission 仍需
+  人工 `apply`，且已认证主体必须有 current certificate（stale/digest 漂移阻断）。
