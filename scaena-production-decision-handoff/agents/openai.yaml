@@ -1,0 +1,4 @@
+display_name: "Scaena 生产决策交接"
+short_description: "把已确认漫剧决策交给 Scaena readiness、simulation 与 skill plan"
+default_prompt: "请使用 $scaena-production-decision-handoff 读取这个已确认 DecisionBrief 的 Scaena 生产事实，并先生成零调用 simulation。"
+

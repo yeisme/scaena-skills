@@ -112,6 +112,20 @@ Pi/插件只能调用 Scaena typed API、MCP owner 或 Eikona CLI；不得在插
 
 ## Seedance 提示词与请求调试
 
+使用 Seedance 2.5 前先读取
+`../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`，并由当前安装版本确认
+task mode、reference role/count、ratio/duration lock、resolution/output/audio 与 maturity：
+
+```bash
+scaena video model show --model doubao-seedance-2-5-260628 --json
+```
+
+官方文档列出的 50 引用、纯音频、多语言原生音频、1080p、MOV、edit/extend/frames
+可以进入合同和离线 fixture 计划，但本地 descriptor 未投影或没有真实 canary/review 时
+只能返回 `capability_missing`/`needs_contract`/`production_ready=false`。Ark 的
+`omni_reference_task_type` 由 adapter 从 provider-neutral task policy 推导；不要把它写进
+prompt、bundle 或 handoff。
+
 ### 文件优先与时间戳分段
 
 长提示词必须优先保存为项目内的普通 Markdown/text 文件，再通过现有 `--prompt-file` 入口加载。目录按 Eikona 的 owner/asset-type/collection 语义组织：
@@ -141,7 +155,8 @@ prompts/scaena/video-transfer/<episode>-<shot-or-chunk>/prompts/01-<direction>.m
 
 时间必须是当前 provider clip 的相对时间：首段从零开始，按顺序无 gap/overlap，末段等于 clip duration。源视频绝对时间由 shot/chunk binding 保存。详细规则读取 [references/prompt-corpus-and-timeline.md](references/prompt-corpus-and-timeline.md)。
 
-当前真实提交命令：
+以下是当前已验证的 legacy Tokenspace Seedance 2.0 转绘提交命令，不是 Seedance 2.5
+Ark 的请求模板：
 
 ```bash
 export SCAENA_PROJECT=/path/to/scaena-project
@@ -183,6 +198,11 @@ scaena video task debug \
 3. **wire content 顺序**：固定 `text → reference_video → reference_image...`。内部 `character_identity` 仅在 adapter 边界映射成 wire `reference_image`；`content[]` 的 asset refs 是判断错误角色是否被上传的唯一证据。
 4. **安全参数**：model、duration、ratio、resolution、audio、API surface 和 filing 是否存在。正文、签名 URL、object key、credential、raw body 均不可输出。
 5. **结果边界**：正确 prompt / binding 只证明输入契约；Seedance 是采样模型，不能证明手部、门把手、人物数量或帧级连续性。只有审核 mask 加源帧 pixel-lock composite 的蒙版外差分为零，才能证明原场景/物品/字幕保留。
+
+Seedance 2.5 的请求排查按 task policy、media ordinal/count、ratio/duration lock、
+output/audio policy 和 maturity 顺序进行。若当前 `video task prompt/debug` 尚未为 Ark
+发布同等账本投影，返回 capability gap；不要拿 Tokenspace 的固定 wire 顺序或 filing
+字段推断 Ark body。
 
 对于快照上线前的任务，明确报告 `capture_status=not_captured`，只用冻结 bundle 和确定性 adapter 规则说明已知 media order；不得臆造历史 prompt 或参数。完整方法见 [references/seedance-request-debug.md](references/seedance-request-debug.md)。
 
@@ -246,6 +266,7 @@ go -C "$SCAENA_REPO" test ./internal/domain/transferworkflow ./internal/mcp -run
 
 - 宿主项目自己的交互设计、阶段门禁、工具合同和生产复盘属于项目私有证据，不随本 Skill 仓库分发。
 - Seedance 请求调试：`references/seedance-request-debug.md`
+- Seedance 2.5 Scaena 映射：`../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`
 - Prompt corpus 与时间戳格式：`references/prompt-corpus-and-timeline.md`
 - 视频参考约束：`$ai-drama-video-reference-director`
 - 主体生产门禁：`$scaena-subject-asset-readiness`

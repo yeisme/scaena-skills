@@ -2,6 +2,17 @@
 
 这个参考规定回答“最终提示词是什么”的最低信息层级。它只描述调试方法，不保存或展示 raw prompt、provider body、签名 URL、object key 或凭据。
 
+下面的 `task prompt/debug` 示例是已发布的 legacy Tokenspace Seedance 2.0 账本查询。
+Seedance 2.5 使用前先运行：
+
+```bash
+scaena video model show --model doubao-seedance-2-5-260628 --json
+```
+
+再读取 `../../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`。
+当前安装版本没有 Ark prompt/debug 同等投影时返回 `capability_missing`；不要把旧网关的
+`content[]` 顺序、filing 或 identity-transform 结论套到 Ark。
+
 ## 命令
 
 ```bash
@@ -42,3 +53,7 @@ scaena video task debug \
 | prompt digest 与本地文件不一致 | 操作输入漂移 | 用正确版本文件重新创建已批准的 draw。 |
 | `capture_status=not_captured` | 历史任务没有安全快照 | 不伪造正文；利用 bundle lineage 分析，后续改用 `--prompt-file`。 |
 | 蒙版外差异不为零 | composite failure | 停止交付，修复 mask/对齐；不要用新的 prompt 覆盖验收失败。 |
+
+Seedance 2.5 还需要分流：task mode/media 不匹配、ratio/duration lock 违反、引用总数或
+分项上限超出、output/audio policy 不受当前 build 支持，以及 capability maturity 仅为
+contract/fixture/provider-smoke。上述情况都不允许通过改 prompt 绕过。

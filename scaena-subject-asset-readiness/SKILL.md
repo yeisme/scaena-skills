@@ -100,6 +100,7 @@ scaena asset draw status --project <project-path> --asset <asset-ref> --agent
 - rights/permission；
 - exact shot bindings；
 - model reference capability；
+- capability maturity、task policy、reference media role/count、ratio/duration/output/audio policy；Seedance 2.5 映射见 `../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`；
 - current graph/binding/subject versions；
 - blocking continuity findings。
 
@@ -135,6 +136,10 @@ expected_graph_version
 这些版本随后必须进入同一条不可变执行链：`ShotIntent` 固定叙事与连续性意图，`ShotGenerationSpec` 固定 capability/output 解释，`VideoGenerationInputBundle` 固定实际输入版本。主体 preflight 是这条链的前置门禁，不是三种对象的替代品；三种对象也不能反过来替代主体冻结、rights 或一致性审阅。
 
 如果 intent/spec/bundle 任一对象引用了“最新版本”、遗漏 frozen subject/style/reference version、与 ProductionGraph 版本不一致，或 digest 已 stale，则返回 `stale`/`blocked`，owner call count 必须为零。
+
+模型官方支持 50 引用、纯音频、1080p 或 MOV 不能替代本地 capability snapshot。
+主体/参考 binding 只放当前镜头需要的最小集合；数量虽未超 provider 上限但用途、ordinal、
+rights 或 continuity 不明确时仍要阻断。
 
 plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能自动换成“最新角色”。
 

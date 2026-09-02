@@ -12,6 +12,7 @@ Operate Scaena as a staged production system. Do not equate generated files, fix
 - 生产阶段、owner 和 gate： [production-gates.md](references/production-gates.md)。
 - 整集拼接、timeline 选版、缺陷分类、有界精修和 export： [episode-refinement-loop.md](references/episode-refinement-loop.md)。
 - 主体抽卡、依赖波次、human-only select/freeze：`$scaena-subject-asset-readiness` 的 `references/candidate-draw-workflow.md`。
+- Seedance 2.5 task policy、capability maturity 与 Bundle/adapter 边界：[seedance-2-5-scaena-mapping.md](references/seedance-2-5-scaena-mapping.md)。
 
 ## Inputs
 
@@ -41,6 +42,8 @@ shot_intent_ref
 shot_audio_intent_ref
 shot_audio_intent_digest
 provider_audio_policy
+video_task_policy_ref
+video_capability_maturity
 shot_generation_spec_ref
 video_input_bundle_ref
 video_run_ref
@@ -170,9 +173,11 @@ Auctra accepted scene spans
 
 `ShotIntent` owns narrative intent, timing, composition, action phases, camera, continuity, audio intent, and exact source refs. Audio intent must bind the versioned `ShotAudioIntent` plan/digest described by `$ai-drama-router`'s `references/shot-audio-intent-contract.md`; a free-text sound label is not sufficient. `ShotGenerationSpec` compiles that frozen intent against one capability/output contract. The spec must reference the intent digest; the bundle references both intent and spec digests. Never add the bundle digest back into the spec, which would create a digest cycle.
 
+For Seedance 2.5, the spec/bundle also freezes provider-neutral task intent, reference roles/ordinals/counts, ratio/duration lock, output/audio policy and capability maturity. The Ark-only `omni_reference_task_type` is adapter-derived and must not appear as a caller-authored canonical field. A local descriptor, fixture, or provider-smoke receipt does not by itself establish `production_ready`.
+
 Before video generation, require an explicit audio policy: `none | external_assets | video_native | replace_after_generation`. If the selected model can or may emit native audio and rights/sync/editability/review are not all known, default to `replace_after_generation`. Missing `ShotAudioIntent`, missing Sonora replacement route, or capability/audio-policy mismatch is a generation blocker.
 
-Before owner execution require all of the following to match: project, ProductionGraph ref/version, shot ref, frozen intent ref/digest, frozen spec ref/digest, validated bundle ref/digest, capability ref, duration, exact subject/style/reference versions, and a non-empty idempotency key.
+Before owner execution require all of the following to match: project, ProductionGraph ref/version, shot ref, frozen intent ref/digest, frozen spec ref/digest, validated bundle ref/digest, capability ref/digest/maturity, task policy, duration/ratio/output/audio policy, exact subject/style/reference versions and ordinals, and a non-empty idempotency key.
 
 The current first-support exposes these contracts through the Scaena SDK/application service and Studio `VideoRun` API. It does not yet publish a stable CLI command for freezing or compiling `ShotIntent`/`ShotGenerationSpec`. Do not invent one or hand-write persisted state. When validating an implementation or local canary, use the real focused checks:
 

@@ -9,6 +9,7 @@ Scaena 分镜拆解、主体抽卡、逐镜生产、整集拼接、精修、交�
 - `scaena-subject-asset-readiness`：角色、场景、道具、服装、风格的 DrawSession 抽卡、human-only 选卡/冻结和镜头绑定/preflight 门禁。
 - `scaena-video-transfer-orchestrator`：已有拆解视频的市场适配、参考资产、prompt provenance、canary 和生成交接。
 - `scaena-local-video-operator`：无项目个人 quick 视频；进入项目必须显式 capture 到 pending review。
+- `scaena-production-decision-handoff`：消费已确认的漫剧 DecisionBrief，读取 storyboard/readiness/session，并只生成零调用 simulation 或显式 skill-plan handoff。
 
 ## 原创漫剧成片链路
 
@@ -26,6 +27,13 @@ Auctra accepted screenplay handoff
 ```
 
 抽卡合同见 `scaena-subject-asset-readiness/references/candidate-draw-workflow.md`；拼接与精修合同见 `scaena-production-operator/references/episode-refinement-loop.md`。当前 `enhance run` v1 是 fixture-only；未注册的整集 workflow goal 和真实付费 enhancement 不得描述为已实现。
+
+Seedance 2.5 的 Scaena 字段/门禁映射见
+`scaena-production-operator/references/seedance-2-5-scaena-mapping.md`。官方事实仍由
+AI drama 的 `ai-drama-router/references/seedance-2-5-capability-profile.md` 单一维护；
+Scaena Skills 只根据当前 model descriptor、capability snapshot、Bundle 和 evidence
+判断 `contract_declared | local_fixture_verified | provider_canary_verified |
+production_ready`，不把 1080p/MOV、50 引用或原生音频的文档声明当作本地已实现。
 
 ## 验证
 

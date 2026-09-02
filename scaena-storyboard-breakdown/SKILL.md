@@ -178,6 +178,8 @@ scaena storyboard breakdown export <breakdown-ref> --project <project-path> --ca
 
 分镜进入付费媒体生成前，使用 production compiler 投影而非工程日志：
 
+- 目标镜头选择 Seedance 2.5 时，读取 `../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`。方向确认必须包含镜头时长、reference/keyframe 用途、声音策略与 output 目标；但分镜阶段不写 Ark wire hint，也不因官方能力声明跳过后续 Bundle/preflight。
+
 - `scaena storyboard breakdown board <breakdown-ref> --json`：第一屏只看一项
   决策、cost 摘要与最多 12 项异常。
 - `scaena storyboard breakdown readiness <breakdown-ref> --json`：12 轴 readiness；

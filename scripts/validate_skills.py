@@ -29,6 +29,7 @@ expected_names = {
     "scaena-subject-asset-readiness",
     "scaena-video-transfer-orchestrator",
     "scaena-local-video-operator",
+    "scaena-production-decision-handoff",
 }
 actual_names = {skill.parent.name for skill in skills}
 if actual_names != expected_names:
