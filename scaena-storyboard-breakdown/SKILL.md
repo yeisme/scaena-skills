@@ -111,7 +111,7 @@ scaena storyboard breakdown run \
   --source-ref <source-ref> \
   --connection <connection-ref> \
   --model <provider/model> \
-  --prompt-template 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=zh-CN' \
+  --prompt-template 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=en' \
   --direction-profile vertical-short-drama-v1 \
   --execution-policy <policy-ref> \
   --max-attempts 2 \
@@ -120,6 +120,8 @@ scaena storyboard breakdown run \
   --confirm \
   --foreground --timeout 10m --events
 ```
+
+Scaena 的 Agent 编译与投递固定使用 `locale=en`。中文剧本、台词和导演说明仍作为 contract 输入；模板包的 `docs/template-zh-CN.md` 只供人工审阅。不要把旧 `locale=zh-CN` exact ref 用于新 production run。
 
 - `--foreground` 只在 preflight 证实可用时使用；超时返回 `WAIT_TIMEOUT` 后保留原 ref 并 `watch`，不新建 idempotency key、不 resubmit、不隐式 cancel。
 - remote/MCP 路径去掉 `--foreground`，用 `run -> status/resource` 轮询；MCP tool 不长时间阻塞，queued 不等于 generated candidate。
@@ -149,6 +151,8 @@ scaena storyboard breakdown diff <breakdown-ref> --project <project-path> --from
 scaena preset camera-move list --intent 发现真相 --json
 scaena preset camera-move show push-in --json
 ```
+
+布光、构图、剪辑/叙事语言与生成 prompt 技术段使用官方镜头技术库（Cinematique，150 条，来源 vvsvs.pro/cinematique）：`promptrepo://official/video/cinematique-shot-techniques-beta@1.0.0-beta.1?locale=en`。逐镜只绑一条主技术；`technique_prompt_bound`（spec 提示词替换 `[Subject]`）进生成 prompt 技术段，技术 id 与选型理由（引 spec `when_to_use`）记录在 candidate 的 direction notes。选型与绑定规则见 `$ai-drama-router` 的 `cinematique-shot-technique-library.md` 参考。
 
 `prompt_template` 只作可审阅骨架；patch 仍使用 canonical `camera_movement`（`slow_push_in`、`dolly_in`、`handheld` 等）。用 `$ai-drama-continuity-supervisor` 检查人物、服装、道具、空间、时间、动作方向、光线、声音和字幕连续性；`unknown` 或 `stale` 不能当 pass。
 
