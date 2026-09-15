@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wan3 视频提示词优化"
+  short_description: "Turn storyboards into submission-ready Wan3.0 prompts and fix failed Wan3.0 cases"
+  default_prompt: "Use $wan3-prompt-optimizer to convert this storyboard into a submission-ready Wan3.0 (wan3.0-video) prompt: decide the generation form (T2V / first-frame / first+last-frame / omnipotent reference / video edit), apply the 否定卡/声音卡/器物卡 rules with @图片N references, keep my lines verbatim, and output only the prompt body in the 【全局设定】+六层镜头 structure."
