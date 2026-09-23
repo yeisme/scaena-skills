@@ -81,6 +81,8 @@ scaena asset draw status --project <project-path> --asset <asset-ref> --agent
 
 `record` 只是 refs-only 登记，不调用 provider。每个 slot 同时只有一个 active session；默认第 6 个候选触发 exhausted，必须修 brief 后重开。Wave 2+ 通过 `--requires` 依赖已冻结 slot。human-only select/freeze 不得由 Agent 伪造；冻结后仍要通过 production readiness/preflight。
 
+🔴 CHECKPOINT · 🛑 STOP：未得到当前 human actor 明确授权前，不得 `select`/`freeze`，不得 `asset-batch dispatch` 付费派发，不得把 Eikona candidate 写成 Scaena frozen。
+
 ### 4. 区分 bootstrap 与 production
 
 - `subject_candidate`、`subject_reference`、`look_development`：可在 accepted source/rights 就绪后自举；产物只能进入 candidate review。
@@ -114,7 +116,7 @@ scaena asset draw status --project <project-path> --asset <asset-ref> --agent
 - named required subject 没有 frozen version；
 - request 没有 `generation_preflight_ref` 或 preflight 已 stale；
 - `--confirm` 是唯一生成前置条件；
-- fixture/direct ingest accepted 被当成 frozen；
+- repository-test/direct ingest accepted 被当成 frozen；
 - Eikona accepted candidate 被当成 Scaena production accepted；
 - 机器一致性总分直接触发 accept。
 
@@ -161,6 +163,16 @@ plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能
 - 不手建 `assets/<asset-id>/draws/<seq>/candidate.png`；只使用 `asset draw path` 返回的标准路径。
 - 不把 `selected`/`frozen` 当作 production-admitted、shot-accepted 或 export-ready。
 - 不因 Aigora 返回成功回执而跳过 Scaena human consistency review；Phase 0 外部 artifact ref 只能进入 `pending_review`。
+
+## If this fails
+
+| Trigger | First fix | Still failing |
+| --- | --- | --- |
+| Production request missing frozen version / preflight | Return `blocked` with first blockers; `allowed_next_mode=candidate_only` | Do not generate episode/shot assets |
+| Installed command missing | `capability_missing` + owning OpenSpec | Do not invent CLI or write `.scaena` |
+| Eikona accepted / similarity score | Keep as candidate | Do not treat as Scaena frozen |
+| 6th candidate exhausted | Repair brief; reopen session | Do not raise the cap silently |
+| Stale graph/binding/digest | `stale`; owner call count = 0 | Do not swap in “latest character” |
 
 ## 验证
 

@@ -34,8 +34,10 @@ Scaena direction contract 还携带 `horizontal-short-drama-v1`、`anthology-epi
 默认 exact address：
 
 ```text
-promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=zh-CN
+promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=en
 ```
+
+语言约定：编译与投递只使用 en 模板；zh-CN 为人工审阅译文，不进入编译。
 
 Legacy 入口：
 
@@ -43,7 +45,7 @@ Legacy 入口：
 skill:scaena-storyboard-breakdown + version=1
 ```
 
-`--instruction-profile`（默认 `skill:scaena-storyboard-breakdown`，`--instruction-profile-version` 默认 1）只是 compatibility ingress；命令优先使用 `--prompt-template '<exact address>'`。Skill 不读取、不复制、不缓存 Prompt body；receipt 只保留 snapshot ref/digest/locale/maturity。用户明确给出另一个 exact address 时，先 inspect/validate 并向用户展示 ref/digest/maturity，不静默替换为 latest，也不在 digest 漂移后继续执行。
+`--instruction-profile`（默认 `skill:scaena-storyboard-breakdown`，`--instruction-profile-version` 默认 1）只是 compatibility ingress；命令优先使用 `--prompt-template '<exact address>'`。Skill 不读取、不复制、不缓存 Prompt body；receipt 只保留 snapshot ref/digest/locale/maturity。用户明确给出另一个 exact address 时，先 inspect/validate 并向用户展示 ref/digest/maturity，不静默替换为 latest，也不在 digest 漂移后继续执行。`--auctra-handoff-ref` 默认不可用（nil client）；opt-in file 模式见 Scaena `docs/protocols/auctra-bridge.md`。先 `scaena handoff auctra import --from <handoff.json> --confirm` 或配置 `storyboard_auctra` 后再用该 flag。
 
 ## Provider-free preflight（真实命令）
 
@@ -56,8 +58,8 @@ scaena storyboard breakdown diff --help
 scaena storyboard breakdown show --help
 scaena production status --project <project-path> --json
 scaena prompt-asset repository doctor --json
-scaena prompt-asset catalog inspect 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=zh-CN' --json
-scaena prompt-asset catalog validate 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=zh-CN' --json
+scaena prompt-asset catalog inspect 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=en' --json
+scaena prompt-asset catalog validate 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=en' --json
 ```
 
 Preflight 输出这些 facts：source/profile/direction/prompt identity（ref/digest）、owner readiness（`scaena.storyboard_model.v1` capability state/verification/production_ready）、connection/config readiness、estimate 与 cost cap。`repository doctor` 与 `catalog inspect/validate` 的 envelope 自带 `provider_calls` 字段，必须为 0；catalog inspect 需返回 `ready=true` 与预期 digest/locale，validate 需无 blockers。

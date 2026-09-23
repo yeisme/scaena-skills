@@ -79,30 +79,19 @@ evidence_refs=<refs>
 
 ## 工作流
 
-### 1. Provider-free preflight
+命令全文： [commands.md](references/commands.md)。提纲：
 
-执行 [routing-and-preflight.md](references/routing-and-preflight.md)：用真实 `--help`/status/doctor/catalog 命令核实 CLI 能力、owner readiness、PromptRepo address、source/profile/direction identity 与 whole-episode estimate，provider/owner 调用数为 0。设计文档里的目标命令不得冒充当前可运行命令；未实现的 flag/命令返回 `capability_missing` 并回退当前真实 async 路径。
-
-### 2. 接纳一份精确 source
-
-一次只选一种 ingress：
+1. Provider-free preflight：执行 [routing-and-preflight.md](references/routing-and-preflight.md)。用真实 `--help`/status/doctor/catalog 核实 CLI 能力、owner readiness、PromptRepo address、source/profile/direction identity 与 whole-episode estimate；provider/owner 调用数为 0。未实现的 flag/命令返回 `capability_missing`。
+2. 接纳一份精确 source，一次一种 ingress（file / stdin / `--source-ref`）。`--auctra-handoff-ref` 未接线时先 `scaena handoff auctra import --from <handoff.json> --confirm`。Source 上限 1 MiB；MCP `source_import` 只要 opaque `input_grant_ref`。不要把 absolute local path 或大正文写入 receipt。
 
 ```bash
 scaena storyboard source import --project <project-path> --episode <episode-ref> --from <script.fountain> --json
-scaena storyboard source import --project <project-path> --episode <episode-ref> --from - --json
-scaena storyboard source import --project <project-path> --episode <episode-ref> --source-ref <source-ref> --json
-scaena storyboard source import --project <project-path> --episode <episode-ref> --auctra-handoff-ref <handoff-ref> --json
 ```
+3. 付费 run/revise 前向用户展示完整 approval packet（source identity/classification、execution policy、direction、Prompt snapshot、owner readiness、provider data policy、connection ref、exact model、fallbacks、attempts、cost cap、write/cost effect）。“继续”“看看”“下一步”只允许 read-only status/watch/review。
 
-Source 上限是 1 MiB。不要把 absolute local path 写入 receipt；stdin/file body 只在 admission 时瞬时读取。MCP 调用 `scaena.storyboard.source_import` 必须携带 `approved=true` 和稳定 `idempotency_key`。剧本正文优先用 CLI file/stdin ingress；不要把大正文粘贴进对话或证据。
+🔴 CHECKPOINT · 🛑 STOP：未展示上述 packet、未得到当前用户对本次 cost/write 的明确授权前，不得执行 `breakdown run`、`revise`、`accept`、`reject` 或 `export --overwrite`。
 
-### 3. 展示 approval packet 并取得一次当前明确授权
-
-付费 run/revise 前向用户展示完整 packet（source identity/classification、execution policy、direction、Prompt snapshot、owner readiness、provider data policy、connection ref、exact model、fallbacks、attempts、cost cap、write/cost effect），见 routing-and-preflight.md。“继续”“看看”“下一步”只允许 read-only status/watch/review，不得跨越 cost 或 canonical/export gate；confidential source 的 policy mismatch 不能用 generic bypass 绕过。
-
-### 4. 运行有成本上限的分镜拆解
-
-local verified runtime 优先 foreground；remote/API/MCP 保持 async。两条路径都以同一个已授权 packet 为准：
+4. 运行有成本上限的分镜拆解。local verified runtime 优先 foreground；remote/API/MCP 保持 async。编译与投递固定 `locale=en`。不要静默换模型、换 key 或提高预算。
 
 ```bash
 scaena storyboard breakdown run \
@@ -121,78 +110,10 @@ scaena storyboard breakdown run \
   --foreground --timeout 10m --events
 ```
 
-Scaena 的 Agent 编译与投递固定使用 `locale=en`。中文剧本、台词和导演说明仍作为 contract 输入；模板包的 `docs/template-zh-CN.md` 只供人工审阅。不要把旧 `locale=zh-CN` exact ref 用于新 production run。
-
-- `--foreground` 只在 preflight 证实可用时使用；超时返回 `WAIT_TIMEOUT` 后保留原 ref 并 `watch`，不新建 idempotency key、不 resubmit、不隐式 cancel。
-- remote/MCP 路径去掉 `--foreground`，用 `run -> status/resource` 轮询；MCP tool 不长时间阻塞，queued 不等于 generated candidate。
-- `--instruction-profile skill:scaena-storyboard-breakdown --instruction-profile-version 1` 是 legacy 兼容入口；优先 `--prompt-template` exact address，不读取、不复制 Prompt body。
-- Fallback model 必须由用户或既有 policy 显式提供；不要静默换模型、换 key 或提高预算。runtime unavailable、contract mismatch、cost cap、invalid delivery 或 repair exhausted 都要 fail closed，不生成本地伪候选。
-
-MCP 对应 `scaena.storyboard.breakdown_run`。所有 mutation 都要 `approved=true` 和 `idempotency_key`；revise、patch、accept、reject 还必须携带 positive `expected_version`。
-
-### 5. Review loop：safe summary 到 explicit detail
-
-执行 [review-and-acceptance.md](references/review-and-acceptance.md) 的固定顺序：safe summary -> direction summary -> findings -> shots -> explicit detail（仅显式需要时）-> director/continuity assessment -> revise/patch -> reload/diff -> human accept/reject -> optional export。
-
-```bash
-scaena storyboard breakdown show <breakdown-ref> --project <project-path> --view summary --agent
-scaena storyboard breakdown show <breakdown-ref> --project <project-path> --view findings --candidate <candidate-ref> --json
-scaena storyboard breakdown watch <breakdown-ref> --project <project-path> --timeout 5m --json
-scaena storyboard breakdown diff <breakdown-ref> --project <project-path> --from-candidate <old-ref> --to-candidate <new-ref> --json
-```
-
-只有用户明确核对对白或生图提示词时，才读取 `--include-dialogue`/`--include-prompt` 或 `--view prompts`。MCP 默认读取 `scaena://storyboard-breakdown/{breakdown_ref}` 或 `scaena://storyboard-candidate/{candidate_ref}`；即使读取了正文，也不要把它复制进 routine receipt。
-
-### 6. 审阅并选择 revise 或 patch
-
-用 `$ai-drama-director` 检查观众信息、人物行动、调度、景别、角度、运镜、节奏和声音意图；它只提供 directing decision，不写 Scaena 状态。选择运镜时先查 Scaena 内置模板，不要手写平行词表：
-
-```bash
-scaena preset camera-move list --intent 发现真相 --json
-scaena preset camera-move show push-in --json
-```
-
-布光、构图、剪辑/叙事语言与生成 prompt 技术段使用官方镜头技术库（Cinematique，150 条，来源 vvsvs.pro/cinematique）：`promptrepo://official/video/cinematique-shot-techniques-beta@1.0.0-beta.1?locale=en`。逐镜只绑一条主技术；`technique_prompt_bound`（spec 提示词替换 `[Subject]`）进生成 prompt 技术段，技术 id 与选型理由（引 spec `when_to_use`）记录在 candidate 的 direction notes。选型与绑定规则见 `$ai-drama-router` 的 `cinematique-shot-technique-library.md` 参考。
-
-`prompt_template` 只作可审阅骨架；patch 仍使用 canonical `camera_movement`（`slow_push_in`、`dolly_in`、`handheld` 等）。用 `$ai-drama-continuity-supervisor` 检查人物、服装、道具、空间、时间、动作方向、光线、声音和字幕连续性；`unknown` 或 `stale` 不能当 pass。
-
-- 结构、镜头拆分、source/dialogue mapping、Prompt mapping、entity/continuity 或 profile/direction 变化：使用 Agent revise。
-- 只改 `dramatic_purpose`、`action_summary`、`shot_size`、`camera_angle`、`camera_movement`、`duration_ms`、`voice_over`、`sfx`、`continuity_notes`：使用 typed patch。
-- 不允许 patch identity、order、source span、dialogue 或 prompt body。
-
-```bash
-scaena storyboard breakdown revise <breakdown-ref> --project <project-path> --candidate <candidate-ref> --target <scene-or-shot-ref> --instruction <bounded-instruction> --connection <connection-ref> --model <provider/model> --max-cost-usd <amount> --expected-version <version> --idempotency-key <stable-key> --confirm --events
-
-scaena storyboard breakdown patch <breakdown-ref> --project <project-path> --candidate <candidate-ref> --shot <shot-ref> --set camera_movement=slow_push_in --set duration_ms=4200 --expected-version <version> --json
-```
-
-每次 revise/patch 都创建 immutable successor；完成后重新读取 current head 并 diff，不能继续操作旧 candidate。Typed patch 是本地 successor，不调用 owner/provider。
-
-### 7. 人工 accept 或 reject
-
-执行前读取 [review-and-acceptance.md](references/review-and-acceptance.md)。只有 current head、expected version 匹配、无 blocking/stale/unknown findings、已呈现完整 direction review 且当前用户明确批准 materialization 时才能 accept：
-
-```bash
-scaena storyboard breakdown accept <breakdown-ref> --project <project-path> --candidate <candidate-ref> --expected-version <version> --actor <human-actor-ref> --idempotency-key <stable-key> --confirm --json
-```
-
-Accept 才物化 ProductionGraph/Scene/Shot。模型、Agent、Skill 或 runtime receipt 不得 self-accept；Skill/model/provider success 也不触发 accept 或任何 Eikona 调用。
-
-Reject 也需要当前用户明确批准，但必须保持 canonical Scene/Shot 零写入：
-
-```bash
-scaena storyboard breakdown reject <breakdown-ref> --project <project-path> --candidate <candidate-ref> --expected-version <version> --actor <human-actor-ref> --idempotency-key <stable-key> --confirm --json
-```
-
-### 8. 明确确认后导出；downstream 是独立 gate
-
-CSV、JSON、Markdown 可用于人工审阅或下游交接；导出本身不等于 accept，也不等于 production-ready：
-
-```bash
-scaena storyboard breakdown export <breakdown-ref> --project <project-path> --candidate <candidate-ref> --format csv --output exports/storyboards/<name>.csv --idempotency-key <stable-key> --confirm --json
-```
-
-覆盖已有普通文件必须再得到明确授权并使用 `--overwrite`。不得绕过 path、symlink、formula-injection 或 checksum 门禁。MCP 对应 `scaena.storyboard.breakdown_export`；导出结果通过 `scaena://storyboard-export/{export_ref}` 读取。Accept 后可选 export 或 shot-planning handoff；批量出图/视频是新 paid downstream stage，必须再次展示已接受方向并获授权；本 Skill 不调用 Eikona。
+5. Review loop：执行 [review-and-acceptance.md](references/review-and-acceptance.md) 的固定顺序（safe summary → direction → findings → shots → explicit detail 仅显式需要时 → director/continuity → revise/patch → reload/diff → human accept/reject → optional export）。运镜先查 `scaena preset camera-move list`；布光/构图/技术段绑官方 Cinematique 库，逐镜一条主技术。
+6. 结构/拆分/mapping/entity/profile 变化用 Agent revise；只改 `dramatic_purpose`、`action_summary`、`shot_size`、`camera_angle`、`camera_movement`、`duration_ms`、`voice_over`、`sfx`、`continuity_notes` 用 typed patch。不允许 patch identity、order、source span、dialogue 或 prompt body。每次 revise/patch 创建 immutable successor，完成后 reload/diff current head。
+7. 只有 current head、expected version 匹配、无 blocking/stale/unknown findings、已呈现完整 direction review 且当前用户明确批准 materialization 时才能 accept。模型/Agent/Skill 不得 self-accept，也不触发 Eikona。Reject 同样需要当前用户明确批准，且 canonical Scene/Shot 零写入。
+8. 明确确认后导出 CSV/JSON/Markdown。导出 ≠ accept，≠ production-ready。覆盖已有文件必须再授权并使用 `--overwrite`。Accept 后的批量出图/视频是新 paid downstream stage；本 Skill 不调用 Eikona。
 
 ## 失败路由
 
@@ -233,27 +154,8 @@ scaena storyboard breakdown export <breakdown-ref> --project <project-path> --ca
 - `BLOCKING_FINDINGS` 后只允许 review、revise、patch、reject 或 export review copy，不允许 accept。
 - 保留 redacted evidence 和真实 error code，不保存 raw source、prompt 或 provider payload。
 
-## 生产编译器门禁（current）
+## 生产编译器门禁
 
-分镜进入付费媒体生成前，使用 production compiler 投影而非工程日志：
+分镜进入付费媒体生成前，使用 production compiler 投影而非工程日志。命令与 12 轴 readiness 见 [production-compiler-gates.md](references/production-compiler-gates.md)。
 
-- 目标镜头选择 Seedance 2.5 时，读取 `../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`。方向确认必须包含镜头时长、reference/keyframe 用途、声音策略与 output 目标；但分镜阶段不写 Ark wire hint，也不因官方能力声明跳过后续 Bundle/preflight。
-
-- `scaena storyboard breakdown board <breakdown-ref> --json`：第一屏只看一项
-  决策、cost 摘要与最多 12 项异常。
-- `scaena storyboard breakdown readiness <breakdown-ref> --json`：12 轴 readiness；
-  `ready_for_generation` 才是付费生成准入，candidate `generation_ready` 仍只表示
-  结构完整。未 accepted 的 ProductionGraph 永不 ready_for_generation。
-- `scaena storyboard breakdown exceptions <breakdown-ref> --json`：按优先级排布
-  的阻塞异常与 stale review refs。
-- scoped range review：`scaena storyboard breakdown work review --breakdown <ref>
-  --candidate <ref> --decision range_approved|changes_requested --start-segment N
-  --end-segment M --actor user:operator --confirm --json`。range receipt 不等于
-  整集 accept；整集 accept 仍是唯一 ProductionGraph 物化门。
-- L3 autopilot：`scaena workflow simulate --automation-level L3_supervised_autopilot`
-  生成 exact plan digest 投影；付费执行前必须 human approve 同一 digest。
-- 主体资产批次与稳定性认证见 `scaena-storyboard-subject-asset-readiness` skill
-  （`storyboard asset-batch *`、`asset stability *` 命令族）。
-
-缺 audio intent、readiness blocker、cost envelope 未预留或 actor 非 human 时
-fail closed；不要绕过这些门禁提交付费生成。
+缺 audio intent、readiness blocker、cost envelope 未预留或 actor 非 human 时 fail closed；不要绕过这些门禁提交付费生成。`ready_for_generation` 才是付费准入；candidate `generation_ready` 只表示结构完整。

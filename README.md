@@ -8,7 +8,7 @@ Scaena 分镜拆解、主体抽卡、逐镜生产、整集拼接、精修、交�
 - `scaena-storyboard-breakdown`：Auctra 剧本 handoff 的 source import、分镜拆解、revise/patch、方向确认和 accepted breakdown。
 - `scaena-subject-asset-readiness`：角色、场景、道具、服装、风格的 DrawSession 抽卡、human-only 选卡/冻结和镜头绑定/preflight 门禁。
 - `scaena-video-transfer-orchestrator`：已有拆解视频的市场适配、参考资产、prompt provenance、canary 和生成交接。
-- `scaena-local-video-operator`：无项目个人 quick 视频；进入项目必须显式 capture 到 pending review。
+- `scaena-local-video-operator`：无项目个人 quick 视频；进入项目必须显式 capture 到 pending review。选模型先跑 `scaena video model list`，再 `video auth list` / `video health`；缺凭据不等于未适配。
 - `scaena-production-decision-handoff`：消费已确认的漫剧 DecisionBrief，读取 storyboard/readiness/session，并只生成零调用 simulation 或显式 skill-plan handoff。
 
 ## 原创漫剧成片链路
