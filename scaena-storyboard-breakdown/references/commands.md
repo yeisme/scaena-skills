@@ -49,8 +49,8 @@ MCP 对应 `scaena.storyboard.breakdown_run`。所有 mutation 都要 `approved=
 ## Review, revise, patch
 
 ```bash
-scaena storyboard breakdown show <breakdown-ref> --project <project-path> --view summary --agent
-scaena storyboard breakdown show <breakdown-ref> --project <project-path> --view findings --candidate <candidate-ref> --json
+scaena storyboard breakdown describe <breakdown-ref> --project <project-path> --view summary --agent
+scaena storyboard breakdown describe <breakdown-ref> --project <project-path> --view findings --candidate <candidate-ref> --json
 scaena storyboard breakdown watch <breakdown-ref> --project <project-path> --timeout 5m --json
 scaena storyboard breakdown diff <breakdown-ref> --project <project-path> --from-candidate <old-ref> --to-candidate <new-ref> --json
 scaena preset camera-move list --intent 发现真相 --json

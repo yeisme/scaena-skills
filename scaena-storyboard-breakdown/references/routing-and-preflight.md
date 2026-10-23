@@ -55,7 +55,7 @@ skill:scaena-storyboard-breakdown + version=1
 scaena storyboard breakdown run --help
 scaena storyboard breakdown watch --help
 scaena storyboard breakdown diff --help
-scaena storyboard breakdown show --help
+scaena storyboard breakdown describe --help
 scaena production status --project <project-path> --json
 scaena prompt-asset repository doctor --json
 scaena prompt-asset catalog inspect 'promptrepo://official/video/ai-drama-storyboard-breakdown@1.0.0?locale=en' --json
@@ -76,7 +76,7 @@ Confidential source 需要先有匹配的 immutable execution policy：
 
 ```bash
 scaena storyboard execution-policy create --project <project-path> --source-classification confidential --retention no_retention --training disallowed --region <allowed-region> --json
-scaena storyboard execution-policy show --project <project-path> --json
+scaena storyboard execution-policy describe --project <project-path> --json
 ```
 
 Policy 与 provider retention/training/region 事实不匹配时返回 `DATA_POLICY_UNVERIFIED`/`DATA_POLICY_MISMATCH` blocker，并给出 connection-policy 更新或显式重新分类的 next action；不发送 source，不提供 generic "proceed anyway" 确认。Receipt 记录 `source_classification`、`execution_policy_ref`、data policy ref 与 retention_mode/training_usage/processing_regions/policy_expiry。
