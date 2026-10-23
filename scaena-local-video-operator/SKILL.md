@@ -27,7 +27,7 @@ scaena video quick --prompt-file prompt.txt --model <model-ref> --channel <chann
 
 ```bash
 scaena video model list --json
-scaena video model show --model <model-ref> --json
+scaena video model describe --model <model-ref> --json
 scaena video auth list --json
 scaena video health --model <model-ref> --json
 ```
@@ -35,7 +35,7 @@ scaena video health --model <model-ref> --json
   若 `scaena video --help` 含 `provider`，可再跑 `scaena video provider list`。
 - 选择 `doubao-seedance-2-5-260628` 时，当前 quick 第一切片仍只声明 text-to-video；
   reference/frames/edit/extend、纯音频、1080p/MOV 等能力必须先由安装版本的
-  `scaena video model show --model doubao-seedance-2-5-260628 --json` 证明，并进入
+  `scaena video model describe --model doubao-seedance-2-5-260628 --json` 证明，并进入
   项目级 Bundle/production gate，不能从官方文档直接提升 quick 命令能力。
 
 ## 门禁输出
