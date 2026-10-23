@@ -56,11 +56,18 @@ else:
     ):
         if required not in refinement_text:
             errors.append(f"{refinement_ref}: missing {required}")
-if (
-    "scaena asset draw plan" not in operator_text
-    or "one bounded owner-specific repair" not in operator_text
-):
-    errors.append(f"{operator_dir / 'SKILL.md'}: incomplete draw/refinement workflow")
+workflow_ref = operator_dir / "references" / "workflow.md"
+if "references/workflow.md" not in operator_text or not workflow_ref.is_file():
+    errors.append(f"{operator_dir / 'SKILL.md'}: missing delegated workflow reference")
+else:
+    workflow_text = workflow_ref.read_text(encoding="utf-8")
+    for command in ("scaena asset draw plan", "scaena workflow repair plan", "scaena workflow repair run"):
+        if command not in workflow_text:
+            errors.append(f"{workflow_ref}: missing {command}")
+if refinement_ref.is_file():
+    for field in ("finding_ref", "owner", "repair_action", "attempt", "successor_refs[]", "evidence_refs[]"):
+        if field not in refinement_text:
+            errors.append(f"{refinement_ref}: missing repair receipt field {field}")
 if "export package --dry-run" in operator_text:
     errors.append(f"{operator_dir / 'SKILL.md'}: uses unsupported export --dry-run flag")
 
@@ -76,7 +83,7 @@ else:
         "scaena asset draw record",
         "scaena asset draw select",
         "scaena asset draw freeze",
-        "openai/gpt-5.4-image-2",
+        "openai/gpt-image-2.5-sunburst",
         "默认 session 上限为 5",
     ):
         if required not in draw_text:
