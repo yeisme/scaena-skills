@@ -64,7 +64,7 @@ Eikona 默认模型使用 canonical ref：
 
 ```bash
 eikona generate <visual-brief> \
-  --model openai/gpt-5.4-image-2 \
+  --model openai/gpt-image-2.5-sunburst \
   --json
 ```
 

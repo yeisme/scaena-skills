@@ -59,7 +59,7 @@ scaena help
 scaena asset draw --help
 scaena asset center --project <project-path> --agent
 scaena character bible show --project <project-path> --character <character-ref> --json
-scaena production graph show <production-graph-ref> --json
+scaena production graph describe <production-graph-ref> --json
 scaena shot board --project <project-path> --episode <episode-ref> --agent
 scaena visual pack plan --graph <production-graph-ref> --json
 ```
