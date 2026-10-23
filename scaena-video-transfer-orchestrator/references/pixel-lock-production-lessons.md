@@ -39,7 +39,7 @@
 
 ## 必须 fail closed 的不足
 
-1. Eikona model ref 必须规范化为 `openai/gpt-5.4-image-2`；双 provider 前缀或空 original ref 不能进入 Scaena handoff。
+1. Eikona model ref 必须规范化为 `openai/gpt-image-2.5-sunburst`；双 provider 前缀或空 original ref 不能进入 Scaena handoff。
 2. Scaena 必须有公开的 subject freeze、mask accept/reject 和 derived correction 操作；缺少命令时返回 capability blocker，不手写 SQLite/JSON。
 3. 蒙版修复必须引用 base track、correction model/digest、提示摘要、输出 digest 和 supersedes ref。
 4. 首镜头 manifest 必须固定 source/chunk/subject/style/mask/model/channel/attempt budget；任何引用漂移后重新 admission，不能自动使用“最新”。

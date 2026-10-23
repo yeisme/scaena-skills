@@ -6,7 +6,7 @@
 Seedance 2.5 使用前先运行：
 
 ```bash
-scaena video model show --model doubao-seedance-2-5-260628 --json
+scaena video model describe --model doubao-seedance-2-5-260628 --json
 ```
 
 再读取 `../../scaena-production-operator/references/seedance-2-5-scaena-mapping.md`。

@@ -118,7 +118,7 @@ scaena source-video register --from "$SOURCE_VIDEO" --project "$SCAENA_PROJECT" 
 
 Pi/插件只能调用 Scaena typed API、MCP owner 或 Eikona CLI；不得在插件中拼 provider 请求、读取 `.scaena` SQLite、覆盖 manifest/evidence，或把聊天 transcript 当作事实来源。
 
-所有 Eikona 图片 intent 在韩国转绘项目中默认显式使用 `openai/gpt-5.4-image-2`。短别名只作为显式兼容输入；新的 prompt、skill、runbook 和正向命令必须保存 slash-form canonical ref。若 Eikona 回执出现 provider-colon、双 provider 前缀、空 `original_model_ref` 或模型漂移，停止 Scaena handoff 并返回模型规范化 blocker。Pi 不保存 key，凭据只存在 Eikona user-level channel。
+所有 Eikona 图片 intent 在韩国转绘项目中默认显式使用 `openai/gpt-image-2.5-sunburst`。短别名只作为显式兼容输入；新的 prompt、skill、runbook 和正向命令必须保存 slash-form canonical ref。若 Eikona 回执出现 provider-colon、双 provider 前缀、空 `original_model_ref` 或模型漂移，停止 Scaena handoff 并返回模型规范化 blocker。Pi 不保存 key，凭据只存在 Eikona user-level channel。
 
 Seedance 提示词、时间戳分段与 task prompt/debug：[seedance-prompt-debug.md](references/seedance-prompt-debug.md)。
 
@@ -169,7 +169,7 @@ job_ref=<long-running job ref, when present>
 - provider 返回成功但没有 artifact digest、owner receipt 或 review 状态；
 - Eikona artifact 仍是 candidate、尚未完成 typed handoff/stage/apply，或 Scaena 没有 frozen `SubjectVersion`；
 - 蒙版仍是 `pending_review`、退回版本没有 supersedes lineage，或审核蒙版外出现非零像素差异；
-- Eikona model ref 不是 canonical `openai/gpt-5.4-image-2`，或回执出现重复 provider 前缀；
+- Eikona model ref 不是 canonical `openai/gpt-image-2.5-sunburst`，或回执出现重复 provider 前缀；
 - 生产 bundle 的 `reference_video` 仍是本地路径、`file://` 或瞬时 URL，而不是已登记的 durable source-video ref；
 - 需要替换或删除已有资产但没有明确确认。
 
@@ -197,3 +197,9 @@ go -C "$SCAENA_REPO" test ./internal/domain/transferworkflow ./internal/mcp -run
 - 视频参考约束：`$ai-drama-video-reference-director`
 - 主体生产门禁：`$scaena-subject-asset-readiness`
 - Scaena 生产操作：`$scaena-production-operator`
+
+## Kie / OpenRouter 原生 Video
+
+Scaena 是 Video owner。Kie.ai (`channel=kie`) 与 OpenRouter (`channel=openrouter`) 是独立原生渠道，必须使用 exact canonical model ID 和显式 channel；不自动 fallback、不自动换模型、不自动重放付费任务。新任务只选择 latest 主线模型，historical 只用于已有 task 查询/reconcile。先读取 `scaena://video-tasks/guide` 的 `model_routing`、capability、pricing、credential readiness，再提交；unknown outcome 只查询原 task ID。Kie 使用 `createTask`/`recordInfo`，OpenRouter 使用 `/api/v1/videos`、poll 和 content download。健康检查、目录存在、本地 fixture 和配置状态都不等于真实 artifact 交付证明。
+
+模型 readiness 与 provider、credential、pricing readiness 分开；目录未验证的 edit/upscale/lip-sync 不可借用通用生成合同。逐模型 duration/resolution/ratio/reference/audio/seed 必须从 owner 支持表读取。当前原生第三方 callback ingress 未接线；polling 为实现路径，不把 Scaena owner callback 当成第三方协议。目录刷新不能修改在途 task；unknown outcome 继续原 task，不换渠道。

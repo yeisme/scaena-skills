@@ -7,7 +7,7 @@ task mode、reference role/count、ratio/duration lock、resolution/output/audio
 ```bash
 scaena video model list --json
 scaena video auth list --json
-scaena video model show --model doubao-seedance-2-5-260628 --json
+scaena video model describe --model doubao-seedance-2-5-260628 --json
 ```
 
 `video model list` 证明本地 descriptor 已注册，不证明凭据、配额或 production_ready。若安装版本还有 `scaena video provider list`，用它看 Provider 聚合；没有则不要发明该命令。
