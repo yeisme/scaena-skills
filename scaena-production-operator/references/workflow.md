@@ -8,19 +8,19 @@ Enter `agent/scaena`, read its `AGENTS.md`, and locate the project. Inspect the 
 scaena doctor --agent
 scaena board --project <project-path> --agent
 scaena workflow status <workflow-run-ref> --project <project-path> --agent
-scaena production graph show <production-graph-ref> --json
+scaena production graph describe <production-graph-ref> --json
 ```
 
 选视频模型前先离线区分「代码已适配」和「本机已配置」。缺凭据不得说成模型未适配；成功 list 也不等于 production-ready：
 
 ```bash
 scaena video model list --json
-scaena video model show --model <model-id> --json
+scaena video model describe --model <model-id> --json
 scaena video auth list --json
 scaena video health --model <model-id> --json
 ```
 
-源码与协议文档还提供 `scaena video provider list`、`scaena video provider show --provider <id>` 和 `scaena video model choose`。若当前安装版本的 `scaena video --help` 没有这些子命令，记录 capability gap，改用已存在的 `video model list` / `video auth list` / `video health`，不要发明命令。
+源码与协议文档还提供 `scaena video provider list`、`scaena video provider describe --provider <id>` 和 `scaena video model choose`。若当前安装版本的 `scaena video --help` 没有这些子命令，记录 capability gap，改用已存在的 `video model list` / `video auth list` / `video health`，不要发明命令。
 
 If a referenced command is unavailable in the installed version, run `scaena help` or the relevant command-group help and use the supported equivalent. Do not invent a replacement command or hand-write `.scaena` state.
 
@@ -31,7 +31,7 @@ Inspect before writing, then require explicit confirmation for import:
 ```bash
 scaena handoff auctra inspect --project <project-path> --from <handoff-file> --json
 scaena handoff auctra import --project <project-path> --from <handoff-file> --confirm --json
-scaena handoff auctra show --project <project-path> <receipt-ref> --json
+scaena handoff auctra describe --project <project-path> <receipt-ref> --json
 ```
 
 Accept only a valid `auctra.production_handoff.v1` producer package or an explicitly reported legacy compatibility projection. Verify the producer `canon_digest`; preserve `source_project_ref`, `source_revision`, scene/action/dialogue refs, and import receipt mappings. Import does not accept generated visuals, freeze subject identity, or authorize video execution.
@@ -45,7 +45,7 @@ Use `$scaena-storyboard-breakdown` and the installed command help:
 ```bash
 scaena storyboard source import --help
 scaena storyboard breakdown run --help
-scaena storyboard breakdown show --help
+scaena storyboard breakdown describe --help
 scaena storyboard breakdown revise --help
 scaena storyboard breakdown patch --help
 scaena storyboard breakdown accept --help

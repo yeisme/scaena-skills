@@ -7,7 +7,7 @@
 ```bash
 scaena video --help
 scaena video model list --json
-scaena video model show --model <model-ref> --json
+scaena video model describe --model <model-ref> --json
 scaena video auth list --json
 ```
 

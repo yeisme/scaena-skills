@@ -44,7 +44,7 @@ acceptance 全部 current，才可投影 `production_ready`。
 ## 当前能力检查
 
 ```bash
-scaena video model show --model doubao-seedance-2-5-260628 --json
+scaena video model describe --model doubao-seedance-2-5-260628 --json
 scaena video health --model doubao-seedance-2-5-260628 --json
 ```
 

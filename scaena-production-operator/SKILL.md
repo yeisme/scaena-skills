@@ -5,6 +5,10 @@ description: Use when planning, running, resuming, repairing, reviewing, assembl
 
 # Scaena Production Operator
 
+## 资源发现
+
+分镜模型先 `scaena model provider list --agent`，从 `fact.provider.N.id` 选真实 id，再 `scaena model provider describe <provider-id> --agent`；身份摘要用 `get`。缺参/未知 id 的恢复动作来自 envelope，不能猜表格或把 0 connections 当成任意 id 有效。先确认安装版支持 canonical 路径，缺失时报告版本差异。视频目录继续使用已发布的 flag 形式。Tab 安装使用 `scaena completion install zsh --yes`，诊断使用 `scaena completion doctor zsh --agent`；不修改 rc。
+
 Operate Scaena as a staged production system. Do not equate generated files, fixture duration, or successful commands with a production-ready episode.
 
 ## 统一模型入口与后台渠道选择
@@ -119,6 +123,8 @@ Quick capture and file intake: `references/intake.md`.
 - Do not edit `.scaena` structured files, SQLite rows, manifests, receipts, or evidence metadata by hand.
 
 ## Validation
+
+Native Video channels are `kie` and `openrouter`, with exact channel-specific model IDs. Inspect `scaena://video-tasks/guide` and binding capabilities before creation; no automatic channel/model fallback or paid replay. Use latest executable contracts only; historical is query/reconcile-only, unverified tools remain unavailable. Catalog, provider, credential, model and pricing readiness are separate. Unknown outcome keeps the original task ID and idempotency binding. Native polling is implemented; third-party callback ingress and catalog-only edit/upscale/lip-sync entries must not be described as executable. Local fixtures, health checks and catalog presence do not prove a live image/video delivery. Read owner protocol support tables before selecting references, duration, resolution, ratio, audio or seed.
 
 - Verify subject readiness/frozen versions/preflight first, then ProductionGraph duration and requirements, quality/continuity findings, preview media duration, review state, and export readiness independently.
 - Treat a production request with missing reference/style/preflight facts as a blocking defect even if a command returns success.

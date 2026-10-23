@@ -105,7 +105,7 @@ Transient owner/network failure 可以按既定 retry policy 使用同一 idempo
 scaena enhance --help
 scaena enhance plan --help
 scaena enhance run --help
-scaena enhance show --help
+scaena enhance describe --help
 ```
 
 当前 v1 `enhance run` 仅允许 fixture 驱动的确定性验证，不代表付费 provider 已接通。没有真实 provider command、receipt 和 artifact lineage 时：
