@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scaena 抽卡批量与快覆盖"
+  short_description: "一次确认批量生产、依赖波次、统一回查与已选衍生快覆盖，不动单槽位门禁。"
+  default_prompt: "Use $scaena-asset-draw-batch to freeze one confirmed asset-slot list, dispatch dependency waves with a template digest and write budget, then read back the whole batch once. When a candidate is already generated and selected and only an existing derived view must be overwritten, use the identity-equal fast path. Keep select/freeze human-only and leave generation to Eikona."

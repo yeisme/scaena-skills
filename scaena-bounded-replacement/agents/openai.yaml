@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scaena 有界资产替换与失败修复"
+  short_description: "用 identity_equal 门绑定替换任务，防断线后的第二次付费提交。"
+  default_prompt: "Use $scaena-bounded-replacement to decide whether a shot video, reference audio or derived asset replacement is identity-equal, bind old/new refs with three provenance digests and one claim_key, run the fixed Eikona replace plus readback, and repair failed video submissions only when the original IDs are still terminal FAILED. Never treat a rollback as acceptance or borrow a repair authorization to change models or prompts."

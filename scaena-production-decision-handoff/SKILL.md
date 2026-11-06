@@ -65,3 +65,13 @@ scaena production session skill-plan apply \
 - 不执行付费生成、分镜 accept/reject、主体选择/冻结、production acceptance、batch expansion、export 或 publish。
 - Auctra story/canon handoff 未完成时，不进入 Scaena production simulation。
 - 不保存 raw source、prompt、provider payload、credential、signed URL、私有路径或完整思维链。
+
+## 执行内核接入（DEK v1）
+
+本 Skill 的 `creative.owner-handoff.v0.1`（source digest、project ref、allowed actions、next command、mutation / confirmation 状态）是 `FrozenRef` 链形状的现成落点：
+
+- 交接只传 `ref + digest`，不传 bytes / 路径 / provider payload；
+- source digest 变化 → 依赖它的 proposal / score / recommendation / handoff 标 `stale`，不继续晋级；
+- `owner_action` 与 `next_command` 是判断结果，不构成 owner 写入授权；写入仍由 owner capability 与 `ai-drama-action-receipt` 的 `IdempotentGrant` 决定。
+
+抽象定义见 `https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/abstract-design.md`。本 Skill 保持 zero-call simulation 与 handoff 边界，不因接入 DEK 而执行付费生成或接受资产。

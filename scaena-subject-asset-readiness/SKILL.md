@@ -197,3 +197,12 @@ plan 与 submit 都要检查；submit 前状态变化必须返回 stale，不能
 - 稳定性认证：`scaena asset stability plan|run|status|verdict|certify`；verdict/
   certify 只接受 human actor；certificate pass 不自动 admission——admission 仍需
   人工 `apply`，且已认证主体必须有 current certificate（stale/digest 漂移阻断）。
+
+## 执行内核接入（DEK v1）
+
+本 Skill 继续独占**单槽位就绪门禁**：cap、wave 依赖、human-only `select/freeze`、稳定性矩阵与 `production_admitted` 判定一律不放松。新增两处转交：
+
+- 「一次确认清单 → 并发 → 统一回查」的批量执行、写入预算、`template_digest` 保护交 `scaena-asset-draw-batch`；
+- 「候选已生成 + 已选定 + 只覆盖既有衍生视图」的 identity-equal 快覆盖交 `scaena-bounded-replacement` 的 EU-09。
+
+命中快路径时仍要求本 Skill 的 `frozen` 上游有效，且 `selected / frozen` 不等于 `production_admitted`、`shot-accepted` 或 `export-ready`。C2 合同见 `https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/contracts/draw-batch.v1.md`。

@@ -145,3 +145,15 @@ Native Video channels are `kie` and `openrouter`, with exact channel-specific mo
 | DrawSession without human select | Human-only accept/freeze | Do not invent candidate paths |
 | Aigora success treated as accepted asset | `pending_review` only | Bytes in CAS require import + review |
 | Export with blocking findings | Fail closed | Draft `--to` still writes a managed manifest |
+
+## 执行内核接入（DEK v1）
+
+`defect-routed refinement` 与失败重提按「技术替换 vs 创意修改」分岔，交 `scaena-bounded-replacement`：
+
+- 只有 `identity_equal`（复用本文执行前校验列表：`project / ProductionGraph / shot / frozen intent / spec / bundle / capability / task policy / duration / ratio / audio / subject / style / reference versions / ordinals / idempotency key`，另加 speaker / timbre / original audio source / dialogue / model / channel）全部相等，才允许技术替换并跳过创意复核；
+- 任一创意字段变化 → 退回完整创作批，新 `idempotency_key` 与新授权，禁止借「原样重提」授权换模型、改正文或改时长；
+- 失败视频只在原返回 ID 终态 `FAILED`、实时回读仍 `FAILED`、原配置逐字段全等时原样重提，共享 `claim_key` 防并发重投；
+- `unknown_accept` 保持原幂等键与 `submission_ref`，只 `reconcile`，与本文既有规则一致；
+- 状态词汇与恢复决策统一引用 `ai-drama-action-receipt`。
+
+完整 EU 目录与 C3 合同见 `https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/execution-units.md`。本 Skill 仍是 Scaena 生产的唯一操作 owner，不因接入 DEK 新增第二条写入路线。
