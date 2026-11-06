@@ -7,6 +7,8 @@ description: Use when producing a confirmed list of Scaena subject assets in one
 
 本 Skill 管理「一批抽卡怎么被并发执行、回查与覆盖」。单槽位是否可冻结、是否 `production_admitted` 仍归 `scaena-subject-asset-readiness`；Eikona 独占生成与 artifact 真源。
 
+**能力层**：抽卡的图片生成统一走 `GenerationCapability<image>.invoke()`，CLI / MCP / HTTP 只是 `GenerationBinding`，resolver 自动选 `executable` binding，**不询问 `cli|mcp`**；一次 `ApprovalWindow` 覆盖本批全自动，可重试错误在 `retry_budget=2` 内自动重试，理由与次数写 `GenerationReceipt.binding_ref` / `retry_used`。详见聚合仓 `docs/drama-execution-kernel/capability-abstraction.md`。
+
 ## 与现有 Skill 的分工
 
 | 职责 | owner |
@@ -32,8 +34,8 @@ scaena asset draw status --project <p> --asset <slot> --agent
 
 ## 输入 / 输出
 
-- 输入：`creative.owner-handoff.v0.1`、已确认 slots、项目模板 digest、`ProductionGraph ref/version`、写入预算、用户明确授权原文。
-- 输出：`scaena.draw_batch.v1` 的 `batch_ref` 与逐项结果分类（新生成 / 旧图复用 / 已绑定 / 在途 / 失败 / 待决 / 缺图）。**结构化批次文件由 Scaena CLI 产出，agent 不手写**。
+- 输入：`creative.owner-handoff.v0.1`、已确认 slots、`GenerationIntent`（`FrozenRef` + typed controls + `template_digest`）、`ApprovalWindow`（`capability_kinds=[image]` / `count` / `cost_ceiling` / `retry_budget=2`）、`ProductionGraph ref/version`、写入预算。
+- 输出：`scaena.draw_batch.v1` 的 `batch_ref` + 逐项 `GenerationReceipt`（含 `binding_ref` / `retry_used` / `event_cursor`）+ 结果分类（新生成 / 旧图复用 / 已绑定 / 在途 / 失败 / 待决 / 缺图）。**结构化批次文件由 Scaena CLI 产出，agent 不手写**。
 
 ## 不变量
 
@@ -43,7 +45,10 @@ scaena asset draw status --project <p> --asset <slot> --agent
 4. `template_digest` 绑定项目模板固定正文，展开词漂移在发送前拒绝。
 5. 不预造 imageId、不自动选候选、不自动覆盖主图、不自动冻结；`candidate → selected → frozen` 每步 human decision。
 6. `COMPLETED` 只表示本批已列节点完成，不等于全剧零遗漏、美术验收或 `production_admitted`。
-7. UNKNOWN / 在途只恢复查询；确认失败不自动付费重试。
+7. UNKNOWN / 在途只 `reconcile` 只读查询，且**不消耗 `retry_budget`**；确认失败不自动付费重试。
+8. 可重试错误（瞬时网络 / 5xx / 429 / 超时且 `mutationAttempted=false` / `binding=unavailable` 换另一个 executable binding）在 `retry_budget=2` 内自动重试，每次保持同一 `action_id` + `idempotency_key` + `intent_digest` + `approval_ref`；已 `ACCEPTED` / 业务·权限·语义拒绝 / 创意输入变化禁止重试；耗尽交 `needs_decision`。
+9. 一张 `ApprovalWindow` 覆盖整批全自动；越界（超 `count` / `cost_ceiling` / `template_digest` 漂移 / 新 kind）必须重新审批；付费生成仍按动作留独立凭证。
+10. `planned / readonly / unavailable` binding 一律 fail-closed；换 binding 不增加权限、不重复审批。
 
 ## Identity-equal 快路径
 
@@ -56,6 +61,7 @@ scaena asset draw status --project <p> --asset <slot> --agent
 - 不调用 provider、不读 Eikona 人类可读输出、不手写 `.scaena` 状态或抽卡 ledger；
 - 不把成功命令、图片数量、Eikona feedback、Auctra acceptance、legacy `approved` 或相似度总分当成生产就绪；
 - 不为每个项目新写专用执行器；复用 `scaena workflow status/resume` 与 `asset draw` 现有入口。
+- 不询问 `cli|mcp|both` 作为流程分支；不把入口差异写进批次计划；不自动扩大 `retry_budget` 或审批范围。
 
 ## 验证
 
@@ -66,5 +72,7 @@ scaena workflow status <workflow-run-ref> --project <p> --agent
 
 ## 按需引用
 
+- 能力抽象与审批窗口：[https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/capability-abstraction.md](https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/capability-abstraction.md)
+- 能力调用合同：`ai-drama-skills` 的 `ai-drama-action-receipt/references/capability-invocation.md`
 - C2 合同：[https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/contracts/draw-batch.v1.md](https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/contracts/draw-batch.v1.md)
 - EU-02/03/04：[https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/execution-units.md](https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/execution-units.md)

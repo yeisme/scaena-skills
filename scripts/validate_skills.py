@@ -31,6 +31,9 @@ expected_names = {
     "scaena-local-video-operator",
     "scaena-production-decision-handoff",
     "wan3-prompt-optimizer",
+    # DEK v1: batch draw and bounded replacement (registered 2026-11-06).
+    "scaena-asset-draw-batch",
+    "scaena-bounded-replacement",
 }
 actual_names = {skill.parent.name for skill in skills}
 if actual_names != expected_names:
