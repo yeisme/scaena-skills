@@ -4,6 +4,7 @@
 
 - **总览与交接**：`https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/HANDOFF.md`
 - **后续实现路线**：`https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/implementation-roadmap.md`
+- **正式 OpenSpec 交接**：主仓 `openspec/changes/drama-execution-kernel-handoff-v1/`；本仓对应的 D1/D2/D3 实现路径见 `implementation-roadmap.md`
 - 能力抽象（一个作用三类 kind）：`https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/capability-abstraction.md`
 - 抽象设计：`https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/abstract-design.md`
 - 执行单元设计：`https://github.com/yeisme/yeisme-agent-my-skills/blob/main/docs/drama-execution-kernel/execution-units.md`
